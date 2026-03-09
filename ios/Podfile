@@ -1,0 +1,17 @@
+platform :ios, '16.0'
+
+target 'RealMatching' do
+  use_frameworks!
+
+  # Networking
+  pod 'Socket.IO-Client-Swift', '~> 16.0.0'
+
+  # Image caching
+  pod 'SDWebImage', '~> 5.15'
+
+  target 'RealMatchingTests' do
+    inherit! :search_paths
+    pod 'Quick'
+    pod 'Nimble'
+  end
+end
