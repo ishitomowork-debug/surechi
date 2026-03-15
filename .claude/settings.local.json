@@ -43,7 +43,8 @@
       "Bash(echo \"Exit: $?\")",
       "Bash(xcodebuild clean -project ios/RealMatching/RealMatching.xcodeproj -scheme RealMatching)",
       "Bash(python3 -c \"import cairosvg\")",
-      "Bash(python3 -c \":*)"
+      "Bash(python3 -c \":*)",
+      "Bash(open /Users/ishitomo/workspace/realmatching/ios/Surechi/Surechi.xcodeproj)"
     ]
   }
 }
