@@ -1,3 +1,4 @@
+import logger from '../utils/logger';
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import User from '../models/userModel';
@@ -30,7 +31,7 @@ export async function getProfile(req: AuthRequest, res: Response) {
       },
     });
   } catch (error) {
-    console.error('Get profile error:', error);
+    logger.error('Get profile error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }
@@ -77,7 +78,7 @@ export async function updateProfile(req: AuthRequest, res: Response) {
       },
     });
   } catch (error) {
-    console.error('Update profile error:', error);
+    logger.error('Update profile error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }
@@ -105,7 +106,7 @@ export async function updateLocation(req: AuthRequest, res: Response) {
 
     res.json({ message: 'Location updated' });
   } catch (error) {
-    console.error('Update location error:', error);
+    logger.error('Update location error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }
@@ -134,7 +135,7 @@ export async function blockUser(req: AuthRequest, res: Response) {
 
     res.json({ message: 'User blocked' });
   } catch (error) {
-    console.error('Block user error:', error);
+    logger.error('Block user error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }
@@ -163,7 +164,7 @@ export async function reportUser(req: AuthRequest, res: Response) {
 
     res.json({ message: 'User reported' });
   } catch (error) {
-    console.error('Report user error:', error);
+    logger.error('Report user error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }
@@ -182,7 +183,7 @@ export async function updateDeviceToken(req: AuthRequest, res: Response) {
     await User.findByIdAndUpdate(req.userId, { deviceToken });
     res.json({ message: 'Device token updated' });
   } catch (error) {
-    console.error('Update device token error:', error);
+    logger.error('Update device token error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }

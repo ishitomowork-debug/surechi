@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bgD" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF8C69;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF3366;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadowD">
+      <feDropShadow dx="0" dy="10" stdDeviation="20" flood-color="rgba(0,0,0,0.3)"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="220" fill="url(#bgD)"/>
+
+  <!--
+    Heart-shaped location pin:
+    - Top is a heart shape
+    - Bottom tapers to a pin point
+    The whole shape reads as both a heart AND a map pin
+  -->
+  <g filter="url(#shadowD)">
+    <path d="
+      M512 820
+      C512 820 260 600 260 430
+      C260 320 340 240 430 240
+      C468 240 504 254 512 260
+      C520 254 556 240 594 240
+      C684 240 764 320 764 430
+      C764 600 512 820 512 820 Z
+    " fill="white" opacity="0.95"/>
+
+    <!-- Inner heart cutout for depth -->
+    <path d="
+      M512 680
+      C512 680 330 555 330 440
+      C330 375 375 330 430 330
+      C464 330 492 348 512 365
+      C532 348 560 330 594 330
+      C649 330 694 375 694 440
+      C694 555 512 680 512 680 Z
+    " fill="url(#bgD)" opacity="0.3"/>
+  </g>
+
+  <!-- Location dot inside the pin -->
+  <circle cx="512" cy="430" r="60" fill="url(#bgD)" opacity="0.9"/>
+  <circle cx="512" cy="430" r="30" fill="white" opacity="0.9"/>
+</svg>

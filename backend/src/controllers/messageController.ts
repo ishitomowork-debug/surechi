@@ -1,3 +1,4 @@
+import logger from '../utils/logger';
 import { Response } from 'express';
 import mongoose from 'mongoose';
 import { AuthRequest } from '../middleware/auth';
@@ -35,7 +36,7 @@ export async function getMessages(req: AuthRequest, res: Response) {
 
     res.json({ messages });
   } catch (error) {
-    console.error('Get messages error:', error);
+    logger.error('Get messages error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }
@@ -74,7 +75,7 @@ export async function markAsRead(req: AuthRequest, res: Response) {
 
     res.json({ updated: result.modifiedCount });
   } catch (error) {
-    console.error('Mark as read error:', error);
+    logger.error('Mark as read error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }

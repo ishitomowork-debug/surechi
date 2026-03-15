@@ -1,0 +1,54 @@
+# Backend
+backend/node_modules/
+backend/dist/
+backend/.env
+backend/.env.local
+backend/.env.*.local
+backend/*.log
+backend/npm-debug.log*
+backend/yarn-debug.log*
+backend/yarn-error.log*
+
+# iOS
+ios/RealMatching/.DS_Store
+ios/RealMatching/DerivedData/
+ios/RealMatching/Pods/
+ios/RealMatching/Podfile.lock
+ios/RealMatching/*.xcworkspace/xcuserdata/
+ios/RealMatching/*.xcodeproj/xcuserdata/
+ios/RealMatching/build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+.DS_Store
+Thumbs.db
+.env.local
+
+# Logs
+logs/
+*.log
+
+# Dependencies
+node_modules/
+/vendor
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# IDE settings
+*.sublime-project
+*.sublime-workspace
+
+# Environment
+.env
+.env.local
+.env.*.local

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- B案改: ティール×ネイビー。より落ち着いた配色 -->
+  <defs>
+    <linearGradient id="bgB2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0F2044"/>
+      <stop offset="100%" style="stop-color:#1A5276"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="220" fill="url(#bgB2)"/>
+
+  <clipPath id="lc2"><circle cx="400" cy="512" r="210"/></clipPath>
+  <circle cx="400" cy="512" r="210" fill="none" stroke="#5DADE2" stroke-width="16" opacity="0.6"/>
+  <circle cx="624" cy="512" r="210" fill="none" stroke="#5DADE2" stroke-width="16" opacity="0.6"/>
+  <!-- 交差部分を明るく -->
+  <circle cx="624" cy="512" r="210" fill="#5DADE2" opacity="0.18" clip-path="url(#lc2)"/>
+
+  <!-- ハート -->
+  <path d="M512 490 C512 490 478 455 454 455 C430 455 410 473 410 497
+           C410 540 460 572 512 610 C564 572 614 540 614 497
+           C614 473 594 455 570 455 C546 455 512 490 512 490 Z"
+        fill="white" opacity="0.95"/>
+</svg>

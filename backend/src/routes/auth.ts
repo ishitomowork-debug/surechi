@@ -1,25 +1,27 @@
 import { Router } from 'express';
-import { register, login, getProfile } from '../controllers/authController';
+import {
+  register,
+  login,
+  getProfile,
+  verifyEmail,
+  forgotPassword,
+  resetPassword,
+  deleteAccount,
+  refreshAccessToken,
+  logout,
+} from '../controllers/authController';
 import authMiddleware from '../middleware/auth';
 
 const router = Router();
 
-/**
- * POST /api/auth/register
- * ユーザー登録
- */
 router.post('/register', register);
-
-/**
- * POST /api/auth/login
- * ユーザーログイン
- */
 router.post('/login', login);
-
-/**
- * GET /api/auth/me
- * 認証済みユーザーのプロフィール取得
- */
+router.post('/logout', logout);
+router.post('/refresh', refreshAccessToken);
 router.get('/me', authMiddleware, getProfile);
+router.get('/verify-email', verifyEmail);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
+router.delete('/account', authMiddleware, deleteAccount);
 
 export default router;

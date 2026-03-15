@@ -14,6 +14,11 @@ export interface IUser extends Document {
   coins: number;
   dailyLikeCount: number;
   dailyLikeResetAt?: Date;
+  emailVerified: boolean;
+  emailVerificationToken?: string;
+  emailVerificationExpires?: Date;
+  passwordResetToken?: string;
+  passwordResetExpires?: Date;
   location?: {
     type: 'Point';
     coordinates: [number, number]; // [longitude, latitude]
@@ -37,6 +42,11 @@ const userSchema = new Schema<IUser>(
     coins: { type: Number, default: 10 }, // 新規登録で10コイン付与
     dailyLikeCount: { type: Number, default: 0 },
     dailyLikeResetAt: { type: Date },
+    emailVerified: { type: Boolean, default: false },
+    emailVerificationToken: { type: String, select: false },
+    emailVerificationExpires: { type: Date, select: false },
+    passwordResetToken: { type: String, select: false },
+    passwordResetExpires: { type: Date, select: false },
     location: {
       type: { type: String, enum: ['Point'], default: 'Point' },
       coordinates: { type: [Number], default: [0, 0] },

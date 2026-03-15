@@ -1,6 +1,10 @@
 import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
+import logger from './utils/logger';
+import { sanitizeRequest } from './middleware/sanitize';
 import { Server as SocketIOServer } from 'socket.io';
 import http from 'http';
 import jwt from 'jsonwebtoken';
@@ -35,9 +39,36 @@ setIO(io);
 
 const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors());
+// Security middleware
+app.use(helmet());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true,
+}));
 app.use(express.json({ limit: '5mb' }));
+app.use(sanitizeRequest);
+
+// Rate limiting
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15分
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later' },
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15分
+  max: 10, // 認証エンドポイントは厳しく
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many authentication attempts, please try again later' },
+});
+
+app.use('/api', generalLimiter);
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
+app.use('/api/auth/forgot-password', authLimiter);
 
 // Database connection
 connectDatabase().catch((error) => {
@@ -47,7 +78,7 @@ connectDatabase().catch((error) => {
 
 // Routes
 app.get('/', (_req: Request, res: Response) => {
-  res.json({ message: 'RealMatching Backend API', version: '1.0.0', status: 'running' });
+  res.json({ message: 'スレチ Backend API', version: '1.0.0', status: 'running' });
 });
 
 app.get('/health', (_req: Request, res: Response) => {
@@ -347,5 +378,5 @@ io.on('connection', (socket) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`🚀 Server is running on http://localhost:${PORT}`);
+  logger.info(`Server is running on http://localhost:${PORT}`);
 });

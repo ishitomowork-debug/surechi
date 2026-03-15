@@ -1,0 +1,61 @@
+{
+  "identifier" : "SurechiStore",
+  "nonRenewingSubscriptions" : [],
+  "products" : [
+    {
+      "displayPrice" : "500",
+      "familyShareable" : false,
+      "internalID" : "1001",
+      "localizations" : [
+        {
+          "description" : "50コインを購入してメッセージを送りましょう",
+          "displayName" : "50コインパック",
+          "locale" : "ja_JP"
+        }
+      ],
+      "productID" : "jp.app.surechi.coins.50",
+      "referenceName" : "50 Coins",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "1500",
+      "familyShareable" : false,
+      "internalID" : "1002",
+      "localizations" : [
+        {
+          "description" : "150コインをまとめてお得に購入",
+          "displayName" : "150コインパック（お得）",
+          "locale" : "ja_JP"
+        }
+      ],
+      "productID" : "jp.app.surechi.coins.150",
+      "referenceName" : "150 Coins",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "5000",
+      "familyShareable" : false,
+      "internalID" : "1003",
+      "localizations" : [
+        {
+          "description" : "500コインを大量購入！一番お得なプラン",
+          "displayName" : "500コインパック（超お得）",
+          "locale" : "ja_JP"
+        }
+      ],
+      "productID" : "jp.app.surechi.coins.500",
+      "referenceName" : "500 Coins",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_locale" : "ja_JP",
+    "_storefront" : "JPN"
+  },
+  "subscriptionGroups" : [],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

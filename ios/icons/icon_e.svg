@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- E案: レーダー/波紋コンセプト。2つの点が近づく。アプリとわかりにくい -->
+  <defs>
+    <linearGradient id="bgE" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0D1B2A"/>
+      <stop offset="100%" style="stop-color:#1B2A3B"/>
+    </linearGradient>
+    <radialGradient id="pingA" cx="35%" cy="50%">
+      <stop offset="0%" style="stop-color:#00D4AA;stop-opacity:0.4"/>
+      <stop offset="100%" style="stop-color:#00D4AA;stop-opacity:0"/>
+    </radialGradient>
+    <radialGradient id="pingB" cx="65%" cy="50%">
+      <stop offset="0%" style="stop-color:#7B68EE;stop-opacity:0.4"/>
+      <stop offset="100%" style="stop-color:#7B68EE;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="220" fill="url(#bgE)"/>
+
+  <!-- 波紋A (左の人) -->
+  <circle cx="360" cy="512" r="200" fill="url(#pingA)"/>
+  <circle cx="360" cy="512" r="130" fill="none" stroke="#00D4AA" stroke-width="3" opacity="0.5"/>
+  <circle cx="360" cy="512" r="80"  fill="none" stroke="#00D4AA" stroke-width="5" opacity="0.7"/>
+
+  <!-- 波紋B (右の人) -->
+  <circle cx="664" cy="512" r="200" fill="url(#pingB)"/>
+  <circle cx="664" cy="512" r="130" fill="none" stroke="#7B68EE" stroke-width="3" opacity="0.5"/>
+  <circle cx="664" cy="512" r="80"  fill="none" stroke="#7B68EE" stroke-width="5" opacity="0.7"/>
+
+  <!-- 左の人 (点) -->
+  <circle cx="360" cy="512" r="28" fill="#00D4AA"/>
+
+  <!-- 右の人 (点) -->
+  <circle cx="664" cy="512" r="28" fill="#7B68EE"/>
+
+  <!-- 接続線 (点線) -->
+  <line x1="395" y1="512" x2="629" y2="512"
+        stroke="white" stroke-width="4" stroke-dasharray="12,12" opacity="0.4"/>
+</svg>

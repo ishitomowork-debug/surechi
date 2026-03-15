@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- F案: ミニマル "R" + ベン図。ブランドロゴ風、アプリと全くわからない -->
+  <defs>
+    <linearGradient id="bgF" x1="135deg" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2D1B69"/>
+      <stop offset="50%" style="stop-color:#4A1F8C"/>
+      <stop offset="100%" style="stop-color:#7B2FBE"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="220" fill="url(#bgF)"/>
+
+  <!-- 2つの重なる円 (細め、洗練) -->
+  <clipPath id="lcF"><circle cx="430" cy="512" r="195"/></clipPath>
+  <circle cx="430" cy="512" r="195" fill="white" opacity="0.08"/>
+  <circle cx="594" cy="512" r="195" fill="white" opacity="0.08"/>
+  <circle cx="430" cy="512" r="195" fill="none" stroke="white" stroke-width="8" opacity="0.5"/>
+  <circle cx="594" cy="512" r="195" fill="none" stroke="white" stroke-width="8" opacity="0.5"/>
+  <!-- 交差ハイライト -->
+  <circle cx="594" cy="512" r="195" fill="white" opacity="0.14" clip-path="url(#lcF)"/>
+
+  <!-- 中央に "R" の文字 -->
+  <text x="512" y="570"
+        font-family="Georgia, serif"
+        font-size="220"
+        font-weight="bold"
+        text-anchor="middle"
+        fill="white"
+        opacity="0.95">R</text>
+</svg>

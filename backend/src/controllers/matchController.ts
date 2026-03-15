@@ -1,3 +1,4 @@
+import logger from '../utils/logger';
 import { Response } from 'express';
 import mongoose from 'mongoose';
 import { AuthRequest } from '../middleware/auth';
@@ -122,7 +123,7 @@ export async function getNearbyUsers(req: AuthRequest, res: Response) {
 
     res.json({ users: usersWithDistance, likesRemaining });
   } catch (error) {
-    console.error('Get nearby users error:', error);
+    logger.error('Get nearby users error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }
@@ -193,7 +194,7 @@ export async function getNearbyUsersForMap(req: AuthRequest, res: Response) {
       center: { latitude: coords[1], longitude: coords[0] },
     });
   } catch (error) {
-    console.error('Get nearby users for map error:', error);
+    logger.error('Get nearby users for map error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }
@@ -279,7 +280,7 @@ export async function likeUser(req: AuthRequest, res: Response) {
 
     res.json({ message: 'Like sent', matched: false });
   } catch (error) {
-    console.error('Like user error:', error);
+    logger.error('Like user error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }
@@ -331,7 +332,7 @@ export async function superlikeUser(req: AuthRequest, res: Response) {
 
     res.json({ message: 'Superlike sent', matched: false });
   } catch (error) {
-    console.error('Superlike user error:', error);
+    logger.error('Superlike user error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }
@@ -354,7 +355,7 @@ export async function dislikeUser(req: AuthRequest, res: Response) {
 
     res.json({ message: 'User skipped' });
   } catch (error) {
-    console.error('Dislike user error:', error);
+    logger.error('Dislike user error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }
@@ -399,7 +400,7 @@ export async function undoDislike(req: AuthRequest, res: Response) {
       },
     });
   } catch (error) {
-    console.error('Undo dislike error:', error);
+    logger.error('Undo dislike error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }
@@ -442,7 +443,7 @@ export async function getLikedMe(req: AuthRequest, res: Response) {
 
     res.json({ users: users.filter((u) => u !== null) });
   } catch (error) {
-    console.error('Get liked me error:', error);
+    logger.error('Get liked me error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }
@@ -456,11 +457,19 @@ export async function getMatches(req: AuthRequest, res: Response) {
 
     const userObjectId = new mongoose.Types.ObjectId(req.userId);
     const now = new Date();
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(50, parseInt(req.query.limit as string) || 20);
+    const skip = (page - 1) * limit;
+
+    const total = await Match.countDocuments({
+      $or: [{ user1: userObjectId }, { user2: userObjectId }],
+      expiresAt: { $gt: now },
+    });
 
     const matches = await Match.find({
       $or: [{ user1: userObjectId }, { user2: userObjectId }],
       expiresAt: { $gt: now }, // 期限切れを除外
-    }).sort({ matchedAt: -1 });
+    }).sort({ matchedAt: -1 }).skip(skip).limit(limit);
 
     const matchesWithUsers = await Promise.all(
       matches.map(async (match) => {
@@ -499,9 +508,15 @@ export async function getMatches(req: AuthRequest, res: Response) {
     );
 
     const validMatches = matchesWithUsers.filter((m) => m !== null);
-    res.json({ matches: validMatches, total: validMatches.length });
+    res.json({
+      matches: validMatches,
+      total,
+      page,
+      pages: Math.ceil(total / limit),
+      hasMore: page * limit < total,
+    });
   } catch (error) {
-    console.error('Get matches error:', error);
+    logger.error('Get matches error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }

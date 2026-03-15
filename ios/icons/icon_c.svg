@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bgC" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1A1A2E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#16213E;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="heartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B9D;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF3366;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Dark background -->
+  <rect width="1024" height="1024" rx="220" fill="url(#bgC)"/>
+
+  <!-- Signal waves (outermost) -->
+  <path d="M512 512 m-320,0 a320,320 0 0,1 640,0" fill="none" stroke="#FF6B9D" stroke-width="20" stroke-linecap="round" opacity="0.2"/>
+  <path d="M512 512 m-240,0 a240,240 0 0,1 480,0" fill="none" stroke="#FF6B9D" stroke-width="22" stroke-linecap="round" opacity="0.35"/>
+  <path d="M512 512 m-160,0 a160,160 0 0,1 320,0" fill="none" stroke="#FF6B9D" stroke-width="26" stroke-linecap="round" opacity="0.55"/>
+  <path d="M512 512 m-80,0 a80,80 0 0,1 160,0" fill="none" stroke="#FF6B9D" stroke-width="30" stroke-linecap="round" opacity="0.75"/>
+
+  <!-- Heart (center) -->
+  <g filter="url(#glow)">
+    <path d="M512 540
+             C512 540 448 480 412 480
+             C376 480 348 506 348 540
+             C348 604 440 656 512 710
+             C584 656 676 604 676 540
+             C676 506 648 480 612 480
+             C576 480 512 540 512 540 Z"
+          fill="url(#heartGrad)"/>
+  </g>
+</svg>

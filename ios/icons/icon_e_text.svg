@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bgE" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0D1B2A"/>
+      <stop offset="100%" style="stop-color:#1B2A3B"/>
+    </linearGradient>
+    <radialGradient id="pingA" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#00D4AA;stop-opacity:0.45"/>
+      <stop offset="100%" style="stop-color:#00D4AA;stop-opacity:0"/>
+    </radialGradient>
+    <radialGradient id="pingB" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#7B68EE;stop-opacity:0.45"/>
+      <stop offset="100%" style="stop-color:#7B68EE;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1024" height="1024" rx="220" fill="url(#bgE)"/>
+
+  <!-- 波紋A (左) -->
+  <circle cx="340" cy="450" r="210" fill="url(#pingA)"/>
+  <circle cx="340" cy="450" r="145" fill="none" stroke="#00D4AA" stroke-width="3" opacity="0.45"/>
+  <circle cx="340" cy="450" r="90"  fill="none" stroke="#00D4AA" stroke-width="5" opacity="0.65"/>
+
+  <!-- 波紋B (右) -->
+  <circle cx="684" cy="450" r="210" fill="url(#pingB)"/>
+  <circle cx="684" cy="450" r="145" fill="none" stroke="#7B68EE" stroke-width="3" opacity="0.45"/>
+  <circle cx="684" cy="450" r="90"  fill="none" stroke="#7B68EE" stroke-width="5" opacity="0.65"/>
+
+  <!-- 接続点線 -->
+  <line x1="378" y1="450" x2="646" y2="450"
+        stroke="white" stroke-width="4" stroke-dasharray="14,12" opacity="0.35"/>
+
+  <!-- 左ドット -->
+  <circle cx="340" cy="450" r="26" fill="#00D4AA"/>
+  <!-- 右ドット -->
+  <circle cx="684" cy="450" r="26" fill="#7B68EE"/>
+
+  <!-- アプリ名 "スレチ" -->
+  <text x="512" y="720"
+        font-family="'Hiragino Sans', 'Helvetica Neue', sans-serif"
+        font-size="148"
+        font-weight="700"
+        text-anchor="middle"
+        letter-spacing="12"
+        fill="white"
+        opacity="0.92">スレチ</text>
+</svg>
