@@ -750,10 +750,14 @@ struct UserCardView: View {
                 if let avatarStr = user.avatar,
                    let data = Data(base64Encoded: avatarStr),
                    let uiImage = UIImage(data: data) {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(maxWidth: .infinity, maxHeight: 300)
+                    GeometryReader { geo in
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: geo.size.width, height: 300)
+                            .clipped()
+                    }
+                    .frame(height: 300)
                 } else {
                     Image(systemName: "person.fill")
                         .font(.system(size: 60)).foregroundColor(.gray)
