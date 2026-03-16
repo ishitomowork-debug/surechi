@@ -753,6 +753,7 @@ struct UserCardView: View {
                     Image(uiImage: uiImage)
                         .resizable()
                         .scaledToFill()
+                        .frame(maxWidth: .infinity, maxHeight: 300)
                 } else {
                     Image(systemName: "person.fill")
                         .font(.system(size: 60)).foregroundColor(.gray)
