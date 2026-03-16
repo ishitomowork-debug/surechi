@@ -70,10 +70,10 @@ app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
 app.use('/api/auth/forgot-password', authLimiter);
 
-// Database connection
+// Database connection (non-blocking — server starts first, DB connects async)
 connectDatabase().catch((error) => {
   console.error('Failed to connect to database:', error);
-  process.exit(1);
+  // Do not exit — allow health check to respond so Railway can see the process is alive
 });
 
 // Routes
