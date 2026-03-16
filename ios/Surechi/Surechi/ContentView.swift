@@ -745,20 +745,18 @@ struct UserCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ZStack {
-                Color.gray.opacity(0.3)
+            ZStack(alignment: .top) {
+                // 背景・画像
                 if let avatarStr = user.avatar,
                    let data = Data(base64Encoded: avatarStr),
                    let uiImage = UIImage(data: data) {
-                    GeometryReader { geo in
-                        Image(uiImage: uiImage)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: geo.size.width, height: 300)
-                            .clipped()
-                    }
-                    .frame(height: 300)
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(maxWidth: .infinity, maxHeight: 360)
+                        .clipped()
                 } else {
+                    Color.gray.opacity(0.3)
                     Image(systemName: "person.fill")
                         .font(.system(size: 60)).foregroundColor(.gray)
                 }
@@ -780,7 +778,6 @@ struct UserCardView: View {
                         .rotationEffect(.degrees(20))
                         .opacity(min(1, max(0, Double(-dragOffset.width / swipeThreshold))))
                 }
-                .frame(maxHeight: .infinity, alignment: .top)
                 .padding(.top, 40)
                 .padding(.horizontal, 20)
 
@@ -801,7 +798,7 @@ struct UserCardView: View {
                     }
                 }
             }
-            .frame(height: 300)
+            .frame(height: 360)
             .clipped()
 
             VStack(alignment: .leading, spacing: 8) {
