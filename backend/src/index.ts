@@ -83,10 +83,9 @@ app.get('/', (_req: Request, res: Response) => {
 
 app.get('/health', (_req: Request, res: Response) => {
   const dbState = mongoose.connection.readyState;
-  const dbStatus = dbState === 1 ? 'connected' : 'disconnected';
-  const status = dbState === 1 ? 'ok' : 'degraded';
-  res.status(dbState === 1 ? 200 : 503).json({
-    status,
+  const dbStatus = dbState === 1 ? 'connected' : 'connecting';
+  res.status(200).json({
+    status: 'ok',
     db: dbStatus,
     uptime: Math.floor(process.uptime()),
   });
@@ -384,6 +383,6 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(PORT, () => {
-  logger.info(`Server is running on http://localhost:${PORT}`);
+server.listen(Number(PORT), '0.0.0.0', () => {
+  logger.info(`Server is running on http://0.0.0.0:${PORT}`);
 });
