@@ -745,61 +745,62 @@ struct UserCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ZStack(alignment: .top) {
-                // 背景・画像
-                if let avatarStr = user.avatar,
-                   let data = Data(base64Encoded: avatarStr),
-                   let uiImage = UIImage(data: data) {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: UIScreen.main.bounds.width, height: 360)
-                        .clipped()
-                } else {
-                    Color.gray.opacity(0.3)
-                    Image(systemName: "person.fill")
-                        .font(.system(size: 60)).foregroundColor(.gray)
-                }
-                // LIKE / NOPE overlay
-                HStack {
-                    Text("LIKE")
-                        .font(.title).fontWeight(.heavy)
-                        .foregroundColor(.green)
-                        .padding(6)
-                        .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.green, lineWidth: 3))
-                        .rotationEffect(.degrees(-20))
-                        .opacity(min(1, max(0, Double(dragOffset.width / swipeThreshold))))
-                    Spacer()
-                    Text("NOPE")
-                        .font(.title).fontWeight(.heavy)
-                        .foregroundColor(.red)
-                        .padding(6)
-                        .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.red, lineWidth: 3))
-                        .rotationEffect(.degrees(20))
-                        .opacity(min(1, max(0, Double(-dragOffset.width / swipeThreshold))))
-                }
-                .padding(.top, 40)
-                .padding(.horizontal, 20)
-
-                // スーパーライクされたバッジ
-                if user.superlikedMe {
-                    VStack {
-                        Spacer()
-                        HStack {
-                            Spacer()
-                            Label("スーパーいいね!", systemImage: "star.fill")
-                                .font(.caption).fontWeight(.bold)
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 10).padding(.vertical, 5)
-                                .background(Color.blue.opacity(0.85))
-                                .cornerRadius(20)
-                                .padding(12)
+            // 画像エリア：Color.clearで幅を確定させてからoverlay
+            Color.clear
+                .frame(height: 360)
+                .overlay(
+                    Group {
+                        if let avatarStr = user.avatar,
+                           let data = Data(base64Encoded: avatarStr),
+                           let uiImage = UIImage(data: data) {
+                            Image(uiImage: uiImage)
+                                .resizable()
+                                .scaledToFill()
+                        } else {
+                            Color.gray.opacity(0.3)
+                                .overlay(
+                                    Image(systemName: "person.fill")
+                                        .font(.system(size: 60))
+                                        .foregroundColor(.gray)
+                                )
                         }
                     }
+                )
+                .clipped()
+                .overlay(alignment: .top) {
+                    // LIKE / NOPE オーバーレイ
+                    HStack {
+                        Text("LIKE")
+                            .font(.title).fontWeight(.heavy)
+                            .foregroundColor(.green)
+                            .padding(6)
+                            .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.green, lineWidth: 3))
+                            .rotationEffect(.degrees(-20))
+                            .opacity(min(1, max(0, Double(dragOffset.width / swipeThreshold))))
+                        Spacer()
+                        Text("NOPE")
+                            .font(.title).fontWeight(.heavy)
+                            .foregroundColor(.red)
+                            .padding(6)
+                            .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.red, lineWidth: 3))
+                            .rotationEffect(.degrees(20))
+                            .opacity(min(1, max(0, Double(-dragOffset.width / swipeThreshold))))
+                    }
+                    .padding(.top, 40)
+                    .padding(.horizontal, 20)
                 }
-            }
-            .frame(height: 360)
-            .clipped()
+                .overlay(alignment: .bottomTrailing) {
+                    // スーパーライクされたバッジ
+                    if user.superlikedMe {
+                        Label("スーパーいいね!", systemImage: "star.fill")
+                            .font(.caption).fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 10).padding(.vertical, 5)
+                            .background(Color.blue.opacity(0.85))
+                            .cornerRadius(20)
+                            .padding(12)
+                    }
+                }
 
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
