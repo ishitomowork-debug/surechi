@@ -753,7 +753,7 @@ struct UserCardView: View {
                     Image(uiImage: uiImage)
                         .resizable()
                         .scaledToFill()
-                        .frame(maxWidth: .infinity, maxHeight: 360)
+                        .frame(width: UIScreen.main.bounds.width, height: 360)
                         .clipped()
                 } else {
                     Color.gray.opacity(0.3)
