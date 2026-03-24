@@ -11,6 +11,7 @@ class PushNotificationService: NSObject {
 
     /// 通知許可をリクエストし、APNs 登録まで行う
     func requestPermissionAndRegister() {
+        UNUserNotificationCenter.current().delegate = self
         UNUserNotificationCenter.current().requestAuthorization(
             options: [.alert, .sound, .badge]
         ) { granted, _ in
@@ -30,4 +31,42 @@ class PushNotificationService: NSObject {
             try? await apiClient.updateDeviceToken(deviceToken: tokenString, authToken: authToken)
         }
     }
+}
+
+// MARK: - UNUserNotificationCenterDelegate
+
+extension PushNotificationService: UNUserNotificationCenterDelegate {
+
+    /// フォアグラウンド時にも通知バナーを表示する
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .sound, .badge])
+    }
+
+    /// 通知タップ時の画面遷移
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        let userInfo = response.notification.request.content.userInfo
+        let type = userInfo["type"] as? String ?? ""
+
+        NotificationCenter.default.post(
+            name: .pushNotificationReceived,
+            object: nil,
+            userInfo: ["type": type, "data": userInfo]
+        )
+
+        completionHandler()
+    }
+}
+
+// MARK: - Notification Name
+
+extension Notification.Name {
+    static let pushNotificationReceived = Notification.Name("pushNotificationReceived")
 }
