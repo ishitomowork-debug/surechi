@@ -326,13 +326,13 @@ io.on('connection', (socket) => {
 
         // いいね記録
         await Interaction.findOneAndUpdate(
-          { from: actorId, to: targetId },
-          { from: actorId, to: targetId, type: 'like' },
+          { fromUser: actorId, toUser: targetId },
+          { fromUser: actorId, toUser: targetId, type: 'like' },
           { upsert: true }
         );
 
         // 相手もいいねしているか確認
-        const mutual = await Interaction.findOne({ from: targetId, to: actorId, type: 'like' });
+        const mutual = await Interaction.findOne({ fromUser: targetId, toUser: actorId, type: 'like' });
         if (!mutual) return;
 
         // マッチング成立

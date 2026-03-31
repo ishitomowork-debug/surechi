@@ -8,8 +8,8 @@
 ---
 
 ## 📊 進捗
-- TODO: 9pt / IN PROGRESS: 0pt / DONE: 10pt
-- 達成率: 52%
+- TODO: 2pt / IN PROGRESS: 0pt / DONE: 18pt
+- 達成率: 90%
 
 ---
 
@@ -23,10 +23,6 @@ _なし_
 
 ### DevOps
 - [ ] **[DevOps 2pt]** MongoDB Atlas バックアップ設定
-- [ ] **[DevOps 3pt]** GitHub Actions CI/CD 設定
-
-### Backend
-- [ ] **[Backend 3pt]** すれ違い検出ロジックのテスト（dev エンドポイントで単体確認）
 
 ### iOS
 - [ ] **[iOS 3pt]** カード画像の比率確認（実機複数機種）
@@ -50,6 +46,10 @@ _なし_
 - [x] **[Backend]** APNs を環境変数（APNS_KEY_CONTENT）で渡す方式に実装済み
 - [x] **[DevOps 1pt]** railway.toml の healthcheckPath を `/health` に修正
 - [x] **[iOS 3pt]** プッシュ通知 UNUserNotificationCenterDelegate 実装（フォアグラウンド表示・タップ遷移）
+- [x] **[DevOps 3pt]** GitHub Actions CI/CD 設定（backend-ci.yml: build + lint）
+- [x] **[Backend 3pt]** すれ違い検出テスト作成（18テスト全パス: Haversine・100m判定・ブロック除外・重複防止）
+- [x] **[Backend 2pt]** encounter:swipe スキーマ不整合修正（from/to → fromUser/toUser）
+- [x] **[Backend 2pt]** APNs を APNS_KEY_CONTENT 環境変数方式に変更（Railway対応）
 
 ---
 
