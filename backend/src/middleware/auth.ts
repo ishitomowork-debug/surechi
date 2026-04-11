@@ -10,6 +10,12 @@ export interface AuthRequest extends Request {
   userId?: string;
 }
 
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error('JWT_SECRET environment variable must be set');
+  return secret;
+}
+
 /**
  * JWT 認証ミドルウェア
  */
@@ -21,7 +27,7 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
       return res.status(401).json({ error: 'No token provided' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as JWTPayload;
+    const decoded = jwt.verify(token, getJwtSecret()) as JWTPayload;
     req.userId = decoded.userId;
     // lastActiveAt を非同期で更新（リクエストをブロックしない）
     User.findByIdAndUpdate(decoded.userId, { lastActiveAt: new Date() }).exec().catch(() => {});
@@ -35,7 +41,7 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
  * JWT トークン生成
  */
 export function generateToken(userId: string): string {
-  return jwt.sign({ userId }, process.env.JWT_SECRET || 'secret', {
+  return jwt.sign({ userId }, getJwtSecret(), {
     expiresIn: '7d',
   } as jwt.SignOptions);
 }
