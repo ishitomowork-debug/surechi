@@ -12,6 +12,13 @@ import { sendPushNotification } from '../utils/apns';
 
 const DAILY_LIKE_LIMIT = 20;
 
+function safeParseInt(value: string | undefined, defaultVal: number, min: number, max: number): number {
+  if (!value) return defaultVal;
+  const parsed = parseInt(value, 10);
+  if (isNaN(parsed)) return defaultVal;
+  return Math.max(min, Math.min(max, parsed));
+}
+
 function calculateDistance(coord1: [number, number], coord2: [number, number]): number {
   const R = 6371e3;
   const lat1 = coord1[1] * (Math.PI / 180);
@@ -53,10 +60,10 @@ export async function getNearbyUsers(req: AuthRequest, res: Response) {
   try {
     if (!req.userId) return res.status(401).json({ error: 'Not authenticated' });
 
-    const limit = Math.min(parseInt(req.query.limit as string) || 10, 50);
-    const radiusMeters = parseInt(req.query.radius as string) || 5000;
-    const minAge = parseInt(req.query.minAge as string) || 18;
-    const maxAge = parseInt(req.query.maxAge as string) || 120;
+    const limit = safeParseInt(req.query.limit as string | undefined, 10, 1, 50);
+    const radiusMeters = safeParseInt(req.query.radius as string | undefined, 5000, 100, 50000);
+    const minAge = safeParseInt(req.query.minAge as string | undefined, 18, 18, 120);
+    const maxAge = safeParseInt(req.query.maxAge as string | undefined, 120, 18, 120);
 
     const currentUser = await User.findById(req.userId).select('location dailyLikeCount dailyLikeResetAt');
     if (!currentUser) return res.status(404).json({ error: 'User not found' });
@@ -457,8 +464,8 @@ export async function getMatches(req: AuthRequest, res: Response) {
 
     const userObjectId = new mongoose.Types.ObjectId(req.userId);
     const now = new Date();
-    const page = Math.max(1, parseInt(req.query.page as string) || 1);
-    const limit = Math.min(50, parseInt(req.query.limit as string) || 20);
+    const page = safeParseInt(req.query.page as string | undefined, 1, 1, 1000);
+    const limit = safeParseInt(req.query.limit as string | undefined, 20, 1, 50);
     const skip = (page - 1) * limit;
 
     const total = await Match.countDocuments({

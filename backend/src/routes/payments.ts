@@ -1,9 +1,19 @@
 import { Router } from 'express';
 import { Response } from 'express';
+import rateLimit from 'express-rate-limit';
 import authMiddleware, { AuthRequest } from '../middleware/auth';
 import User from '../models/userModel';
 
 const router = Router();
+
+// 購入エンドポイント用レート制限（1時間に5回まで）
+const purchaseRateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1時間
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many purchase attempts, please try again later' },
+});
 
 // コインパッケージ定義
 const COIN_PACKAGES = [
@@ -24,7 +34,7 @@ router.get('/balance', authMiddleware, async (req: AuthRequest, res: Response) =
 });
 
 // 購入処理（レシート検証はStoreKit連携時に実装）
-router.post('/purchase', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.post('/purchase', purchaseRateLimiter, authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const { packageId, receiptData } = req.body;
     const pkg = COIN_PACKAGES.find(p => p.id === packageId);
@@ -47,7 +57,7 @@ router.post('/purchase', authMiddleware, async (req: AuthRequest, res: Response)
 // StoreKit 2 IAP 購入報告（transactionID でべき等処理）
 const processedTransactions = new Set<string>();
 
-router.post('/iap', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.post('/iap', purchaseRateLimiter, authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const { productID, transactionID, coins } = req.body;
 
