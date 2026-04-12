@@ -45,7 +45,7 @@ final class StoreManager: ObservableObject {
         }
     }
 
-    /// StoreKit 2 購入フロー
+    /// StoreKit 2 購入フロー（JWS検証対応）
     func purchase(_ product: Product, token: String) async {
         purchaseState = .purchasing
         do {
@@ -54,8 +54,9 @@ final class StoreManager: ObservableObject {
             case .success(let verification):
                 let transaction = try checkVerified(verification)
                 let coins = Self.coins(for: product.id)
-                // バックエンドに購入を通知（コイン付与）
-                try await reportPurchaseToServer(productID: product.id, transactionID: transaction.id, token: token)
+                // JWS署名付きトランザクションをバックエンドに送信して検証・コイン付与
+                let jwsRepresentation = verification.jwsRepresentation
+                try await APIClient().verifyIAP(signedTransaction: jwsRepresentation, token: token)
                 await transaction.finish()
                 purchaseState = .success(coins: coins)
             case .userCancelled:
@@ -79,21 +80,4 @@ final class StoreManager: ObservableObject {
         }
     }
 
-    private func reportPurchaseToServer(productID: String, transactionID: UInt64, token: String) async throws {
-        let url = URL(string: "\(Config.apiBaseURL)/payments/iap")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        let payload: [String: Any] = [
-            "productID": productID,
-            "transactionID": String(transactionID),
-            "coins": Self.coins(for: productID),
-        ]
-        request.httpBody = try JSONSerialization.data(withJSONObject: payload)
-        let (_, response) = try await URLSession.shared.data(for: request)
-        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
-            throw URLError(.badServerResponse)
-        }
-    }
 }
