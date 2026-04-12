@@ -28,9 +28,13 @@ dotenv.config();
 
 const app: Express = express();
 const server = http.createServer(app);
+const socketCorsOrigins = process.env.SOCKET_IO_CORS
+  ? process.env.SOCKET_IO_CORS.split(',').map(o => o.trim())
+  : [];
+
 const io = new SocketIOServer(server, {
   cors: {
-    origin: process.env.SOCKET_IO_CORS || '*',
+    origin: socketCorsOrigins,
     methods: ['GET', 'POST'],
   },
 });
@@ -45,7 +49,7 @@ app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3000',
   credentials: true,
 }));
-app.use(express.json({ limit: '5mb' }));
+app.use(express.json({ limit: '1mb' }));
 app.use(sanitizeRequest);
 
 // Rate limiting
@@ -95,10 +99,27 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/matches', matchRoutes);
 app.use('/api/messages', messageRoutes);
-app.use('/api/dev', devRoutes);
+// 本番環境では dev ルートを無効化
+if (process.env.NODE_ENV !== 'production') {
+  app.use('/api/dev', devRoutes);
+}
 app.use('/api/payments', paymentRoutes);
 
 // ─── Socket.IO ──────────────────────────────────────────────────────────────
+
+// Socket.IO インメモリレート制限
+const socketRateLimits = new Map<string, Map<string, number[]>>();
+
+function checkSocketRateLimit(userId: string, event: string, maxRequests: number, windowMs: number): boolean {
+  const now = Date.now();
+  if (!socketRateLimits.has(event)) socketRateLimits.set(event, new Map());
+  const eventLimiter = socketRateLimits.get(event)!;
+  const timestamps = (eventLimiter.get(userId) || []).filter(ts => now - ts < windowMs);
+  if (timestamps.length >= maxRequests) return false;
+  timestamps.push(now);
+  eventLimiter.set(userId, timestamps);
+  return true;
+}
 
 // JWT認証ミドルウェア（接続時に検証）
 io.use((socket, next) => {
@@ -111,9 +132,13 @@ io.use((socket, next) => {
   }
 
   try {
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      return next(new Error('JWT_SECRET environment variable must be set'));
+    }
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || 'secret'
+      jwtSecret
     ) as { userId: string };
     socket.data.userId = decoded.userId;
     next();
@@ -132,6 +157,10 @@ io.on('connection', (socket) => {
     'message:send',
     async (data: { matchId: string; content: string }) => {
       try {
+        if (!checkSocketRateLimit(userId, 'message:send', 10, 60_000)) {
+          socket.emit('error', { message: 'Rate limit exceeded' });
+          return;
+        }
         const { matchId, content } = data;
         if (!content?.trim()) return;
 
@@ -221,6 +250,9 @@ io.on('connection', (socket) => {
     'location:update',
     async (data: { latitude: number; longitude: number }) => {
       try {
+        if (!checkSocketRateLimit(userId, 'location:update', 6, 60_000)) {
+          return;
+        }
         const { latitude, longitude } = data;
         if (latitude === undefined || longitude === undefined) return;
 
@@ -316,6 +348,10 @@ io.on('connection', (socket) => {
     'encounter:swipe',
     async (data: { targetUserId: string; liked: boolean }) => {
       try {
+        if (!checkSocketRateLimit(userId, 'encounter:swipe', 30, 60_000)) {
+          socket.emit('error', { message: 'Rate limit exceeded' });
+          return;
+        }
         const { targetUserId, liked } = data;
         if (!targetUserId) return;
 
@@ -326,13 +362,13 @@ io.on('connection', (socket) => {
 
         // いいね記録
         await Interaction.findOneAndUpdate(
-          { from: actorId, to: targetId },
-          { from: actorId, to: targetId, type: 'like' },
+          { fromUser: actorId, toUser: targetId },
+          { fromUser: actorId, toUser: targetId, type: 'like' },
           { upsert: true }
         );
 
         // 相手もいいねしているか確認
-        const mutual = await Interaction.findOne({ from: targetId, to: actorId, type: 'like' });
+        const mutual = await Interaction.findOne({ fromUser: targetId, toUser: actorId, type: 'like' });
         if (!mutual) return;
 
         // マッチング成立

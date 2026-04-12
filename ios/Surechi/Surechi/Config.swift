@@ -4,7 +4,7 @@ enum Config {
     #if DEBUG
     static let serverURL = "http://localhost:3000"
     #else
-    static let serverURL = "https://REPLACE_WITH_RAILWAY_URL"
+    static let serverURL = "https://surechi-production.up.railway.app"
     #endif
 
     static let apiBaseURL = "\(serverURL)/api"

@@ -20,9 +20,12 @@ export function errorHandler(
 
   console.error(`[${new Date().toISOString()}] Error:`, error);
 
+  const isProduction = process.env.NODE_ENV === 'production';
+
   res.status(statusCode).json({
-    error: message,
+    error: isProduction && statusCode === 500 ? 'Internal server error' : message,
     statusCode,
+    ...(isProduction ? {} : { stack: error.stack }),
   });
 }
 

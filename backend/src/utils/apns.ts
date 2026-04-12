@@ -5,18 +5,18 @@ let provider: apn.Provider | null = null;
 function getProvider(): apn.Provider | null {
   if (provider) return provider;
 
-  const keyPath = process.env.APNS_KEY_PATH;
+  const keyContent = process.env.APNS_KEY_CONTENT;
   const keyId = process.env.APNS_KEY_ID;
   const teamId = process.env.APNS_TEAM_ID;
 
-  if (!keyPath || !keyId || !teamId) {
+  if (!keyContent || !keyId || !teamId) {
     // 証明書未設定時は通知をスキップ（開発時）
     return null;
   }
 
   provider = new apn.Provider({
     token: {
-      key: keyPath,
+      key: keyContent,
       keyId,
       teamId,
     },

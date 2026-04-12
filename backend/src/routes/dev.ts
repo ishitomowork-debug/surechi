@@ -2,15 +2,24 @@ import express from 'express';
 import { seedNearbyUsers } from '../controllers/devController';
 import authMiddleware from '../middleware/auth';
 import { AuthRequest } from '../middleware/auth';
-import { Response } from 'express';
+import { Response, NextFunction } from 'express';
 import { getIO, userSocketMap } from '../socket';
 
 const router = express.Router();
 
-router.post('/seed', authMiddleware, seedNearbyUsers);
+// 開発者本人のみアクセス可能なミドルウェア
+function devOwnerOnly(req: AuthRequest, res: Response, next: NextFunction) {
+  const allowedId = process.env.DEV_USER_ID;
+  if (!allowedId || req.userId !== allowedId) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  next();
+}
+
+router.post('/seed', authMiddleware, devOwnerOnly, seedNearbyUsers);
 
 // すれ違いシミュレート: 自分のSocketにモックの encounter:nearby を送信
-router.post('/simulate-encounter', authMiddleware, (req: AuthRequest, res: Response) => {
+router.post('/simulate-encounter', authMiddleware, devOwnerOnly, (req: AuthRequest, res: Response) => {
   const userId = req.userId!;
   const socketId = userSocketMap.get(userId);
 

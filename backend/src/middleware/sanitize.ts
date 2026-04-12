@@ -1,17 +1,42 @@
 import { Request, Response, NextFunction } from 'express';
 
+const MAX_DEPTH = 10;
+
 /**
  * MongoDB NoSQLインジェクション対策
- * リクエストボディ・クエリ・パラメータから $ と . で始まるキーを除去
+ * - $ と . で始まるキーを除去
+ * - null bytes を除去
+ * - 再帰的にネストされたオブジェクトもサニタイズ
+ * - 深さ制限（10レベル）で無限再帰を防止
  */
-function sanitizeValue(value: unknown): unknown {
-  if (value === null || typeof value !== 'object') return value;
-  if (Array.isArray(value)) return value.map(sanitizeValue);
+function sanitizeValue(value: unknown, depth: number = 0): unknown {
+  // 深さ制限を超えたら値を破棄
+  if (depth > MAX_DEPTH) return undefined;
 
+  // null / undefined はそのまま返す
+  if (value === null || value === undefined) return value;
+
+  // 文字列の場合、null bytes を除去
+  if (typeof value === 'string') {
+    return value.replace(/\0/g, '');
+  }
+
+  // プリミティブ（number, boolean）はそのまま返す
+  if (typeof value !== 'object') return value;
+
+  // 配列の場合、各要素を再帰的にサニタイズ
+  if (Array.isArray(value)) {
+    return value.map((item) => sanitizeValue(item, depth + 1));
+  }
+
+  // オブジェクトの場合、キーと値を再帰的にサニタイズ
   const sanitized: Record<string, unknown> = {};
   for (const [key, val] of Object.entries(value as Record<string, unknown>)) {
+    // $ や . で始まるキーは NoSQL インジェクションの可能性があるため除去
     if (key.startsWith('$') || key.startsWith('.')) continue;
-    sanitized[key] = sanitizeValue(val);
+    // キー自体に null bytes が含まれていたらスキップ
+    if (key.includes('\0')) continue;
+    sanitized[key] = sanitizeValue(val, depth + 1);
   }
   return sanitized;
 }
