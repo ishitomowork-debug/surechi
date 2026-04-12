@@ -889,9 +889,12 @@ struct UserCardView: View {
             }
         }
         .confirmationDialog("報告する理由を選択してください", isPresented: $showReportSheet, titleVisibility: .visible) {
-            Button("スパム") { onReport?("スパム") }
-            Button("不適切なコンテンツ") { onReport?("不適切なコンテンツ") }
-            Button("ハラスメント") { onReport?("ハラスメント") }
+            Button("セクシャルハラスメント") { onReport?("sexual_harassment") }
+            Button("詐欺・スパム") { onReport?("fraud") }
+            Button("暴力的なコンテンツ") { onReport?("violence") }
+            Button("ヘイトスピーチ") { onReport?("hate_speech") }
+            Button("なりすまし") { onReport?("fake_profile") }
+            Button("その他") { onReport?("other") }
             Button("キャンセル", role: .cancel) {}
         }
     }
@@ -1098,9 +1101,12 @@ struct ChatView: View {
             socketService.currentCoins = authVM.currentUser?.coins ?? 0
         }
         .confirmationDialog("報告する理由を選択してください", isPresented: $showReportSheet, titleVisibility: .visible) {
-            Button("スパム") { reportUser(reason: "スパム") }
-            Button("不適切なコンテンツ") { reportUser(reason: "不適切なコンテンツ") }
-            Button("ハラスメント") { reportUser(reason: "ハラスメント") }
+            Button("セクシャルハラスメント") { reportUser(reason: "sexual_harassment") }
+            Button("詐欺・スパム") { reportUser(reason: "fraud") }
+            Button("暴力的なコンテンツ") { reportUser(reason: "violence") }
+            Button("ヘイトスピーチ") { reportUser(reason: "hate_speech") }
+            Button("なりすまし") { reportUser(reason: "fake_profile") }
+            Button("その他") { reportUser(reason: "other") }
             Button("キャンセル", role: .cancel) {}
         }
         .alert("ブロックしますか？", isPresented: $showBlockConfirm) {
@@ -1227,6 +1233,35 @@ struct ProfileView: View {
                         .frame(maxWidth: .infinity).padding()
                         .background(Color.blue).foregroundColor(.white).cornerRadius(8)
                 }
+                .padding(.horizontal)
+
+                // 利用規約・プライバシーポリシー
+                VStack(spacing: 12) {
+                    Link(destination: URL(string: "\(Config.serverURL)/terms")!) {
+                        HStack {
+                            Image(systemName: "doc.text")
+                            Text("利用規約")
+                            Spacer()
+                            Image(systemName: "arrow.up.right.square")
+                                .font(.caption)
+                        }
+                        .foregroundColor(.primary)
+                    }
+                    Divider()
+                    Link(destination: URL(string: "\(Config.serverURL)/privacy")!) {
+                        HStack {
+                            Image(systemName: "hand.raised")
+                            Text("プライバシーポリシー")
+                            Spacer()
+                            Image(systemName: "arrow.up.right.square")
+                                .font(.caption)
+                        }
+                        .foregroundColor(.primary)
+                    }
+                }
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(10)
                 .padding(.horizontal)
 
                 Spacer()

@@ -95,6 +95,14 @@ app.get('/health', (_req: Request, res: Response) => {
   });
 });
 
+// 静的ページ（利用規約・プライバシーポリシー）
+app.get('/terms', (_req: Request, res: Response) => {
+  res.redirect('https://raw.githubusercontent.com/ishitomowork-debug/surechi/main/store/terms_of_service.md');
+});
+app.get('/privacy', (_req: Request, res: Response) => {
+  res.redirect('https://raw.githubusercontent.com/ishitomowork-debug/surechi/main/store/privacy_policy.md');
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/matches', matchRoutes);

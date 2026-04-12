@@ -245,6 +245,20 @@ struct APIClient {
         return try JSONDecoder().decode(Resp.self, from: data).packages
     }
 
+    func verifyIAP(signedTransaction: String, token: String) async throws {
+        let url = URL(string: "\(baseURL)/payments/iap")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let payload: [String: Any] = ["signedTransaction": signedTransaction]
+        request.httpBody = try JSONSerialization.data(withJSONObject: payload)
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+            throw APIError.fromResponse(data: data, response: response)
+        }
+    }
+
     func purchaseCoins(packageId: String, token: String) async throws -> Int {
         let url = URL(string: "\(baseURL)/payments/purchase")!
         var request = URLRequest(url: url)
