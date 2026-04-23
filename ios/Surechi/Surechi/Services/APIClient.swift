@@ -355,6 +355,33 @@ struct APIClient {
         return try JSONDecoder().decode(RefreshResponse.self, from: data).token
     }
 
+    // MARK: - Verification (本人確認)
+
+    func submitVerification(idImageBase64: String, token: String) async throws {
+        let url = URL(string: "\(baseURL)/verification/submit")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let payload: [String: Any] = ["idImage": idImageBase64]
+        request.httpBody = try JSONSerialization.data(withJSONObject: payload)
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse, (200...201).contains(http.statusCode) else {
+            throw APIError.fromResponse(data: data, response: response)
+        }
+    }
+
+    func getVerificationStatus(token: String) async throws -> VerificationStatus {
+        let url = URL(string: "\(baseURL)/verification/status")!
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+            throw APIError.fromResponse(data: data, response: response)
+        }
+        return try JSONDecoder().decode(VerificationStatus.self, from: data)
+    }
+
     func serverLogout(refreshToken: String) async throws {
         let url = URL(string: "\(baseURL)/auth/logout")!
         var request = URLRequest(url: url)
@@ -550,6 +577,36 @@ struct MatchedUserInfo: Codable, Equatable {
     enum CodingKeys: String, CodingKey {
         case id = "_id"
         case name, age, bio, interests, avatar
+    }
+}
+
+// MARK: - Verification
+
+struct VerificationStatus: Codable {
+    let status: String // "unsubmitted" | "pending" | "approved" | "rejected"
+    let verifiedAt: Date?
+    let verificationNote: String?
+
+    var isApproved: Bool { status == "approved" }
+    var isPending: Bool { status == "pending" }
+    var isRejected: Bool { status == "rejected" }
+    var isUnsubmitted: Bool { status == "unsubmitted" }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        status = (try? c.decode(String.self, forKey: .status)) ?? "unsubmitted"
+        verificationNote = try? c.decode(String.self, forKey: .verificationNote)
+        if let dateString = try? c.decode(String.self, forKey: .verifiedAt) {
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            verifiedAt = formatter.date(from: dateString) ?? ISO8601DateFormatter().date(from: dateString)
+        } else {
+            verifiedAt = nil
+        }
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case status, verifiedAt, verificationNote
     }
 }
 

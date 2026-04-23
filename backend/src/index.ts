@@ -16,6 +16,8 @@ import matchRoutes from './routes/matches';
 import messageRoutes from './routes/messages';
 import devRoutes from './routes/dev';
 import paymentRoutes from './routes/payments';
+import verificationRoutes from './routes/verification';
+import { isUserVerified } from './middleware/requireVerification';
 import { setIO, userSocketMap } from './socket';
 import Message from './models/messageModel';
 import Match from './models/matchModel';
@@ -49,7 +51,8 @@ app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3000',
   credentials: true,
 }));
-app.use(express.json({ limit: '1mb' }));
+// 年齢確認で base64 エンコードされた ID 画像を受け取るため、十分な上限を確保する
+app.use(express.json({ limit: '15mb' }));
 app.use(sanitizeRequest);
 
 // Rate limiting
@@ -112,6 +115,7 @@ if (process.env.NODE_ENV !== 'production') {
   app.use('/api/dev', devRoutes);
 }
 app.use('/api/payments', paymentRoutes);
+app.use('/api/verification', verificationRoutes);
 
 // ─── Socket.IO ──────────────────────────────────────────────────────────────
 
@@ -167,6 +171,10 @@ io.on('connection', (socket) => {
       try {
         if (!checkSocketRateLimit(userId, 'message:send', 10, 60_000)) {
           socket.emit('error', { message: 'Rate limit exceeded' });
+          return;
+        }
+        if (!(await isUserVerified(userId))) {
+          socket.emit('error', { message: 'Age verification required', code: 'VERIFICATION_REQUIRED' });
           return;
         }
         const { matchId, content } = data;
@@ -259,6 +267,10 @@ io.on('connection', (socket) => {
     async (data: { latitude: number; longitude: number }) => {
       try {
         if (!checkSocketRateLimit(userId, 'location:update', 6, 60_000)) {
+          return;
+        }
+        if (!(await isUserVerified(userId))) {
+          socket.emit('error', { message: 'Age verification required', code: 'VERIFICATION_REQUIRED' });
           return;
         }
         const { latitude, longitude } = data;
@@ -358,6 +370,10 @@ io.on('connection', (socket) => {
       try {
         if (!checkSocketRateLimit(userId, 'encounter:swipe', 30, 60_000)) {
           socket.emit('error', { message: 'Rate limit exceeded' });
+          return;
+        }
+        if (!(await isUserVerified(userId))) {
+          socket.emit('error', { message: 'Age verification required', code: 'VERIFICATION_REQUIRED' });
           return;
         }
         const { targetUserId, liked } = data;

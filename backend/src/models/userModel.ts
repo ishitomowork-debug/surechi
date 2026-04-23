@@ -23,6 +23,11 @@ export interface IUser extends Document {
     type: 'Point';
     coordinates: [number, number]; // [longitude, latitude]
   };
+  verificationStatus: 'unsubmitted' | 'pending' | 'approved' | 'rejected';
+  idImageBase64?: string;
+  verifiedAt?: Date;
+  verificationNote?: string;
+  verificationSubmittedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(enteredPassword: string): Promise<boolean>;
@@ -51,6 +56,16 @@ const userSchema = new Schema<IUser>(
       type: { type: String, enum: ['Point'], default: 'Point' },
       coordinates: { type: [Number], default: [0, 0] },
     },
+    verificationStatus: {
+      type: String,
+      enum: ['unsubmitted', 'pending', 'approved', 'rejected'],
+      default: 'unsubmitted',
+      index: true,
+    },
+    idImageBase64: { type: String, select: false },
+    verifiedAt: { type: Date },
+    verificationNote: { type: String },
+    verificationSubmittedAt: { type: Date },
   },
   { timestamps: true }
 );
