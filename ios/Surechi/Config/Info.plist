@@ -29,8 +29,10 @@
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>すれ違ったユーザーを検出するために位置情報を使用します。</string>
+	<key>NSCameraUsageDescription</key>
+	<string>本人確認用の身分証やプロフィール画像を撮影するためにカメラを使用します。</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>プロフィール画像を設定するために写真へのアクセスが必要です。</string>
+	<string>プロフィール画像および本人確認用の身分証画像をアップロードするために写真へのアクセスが必要です。</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

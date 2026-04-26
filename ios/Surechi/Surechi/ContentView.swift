@@ -191,6 +191,7 @@ struct MainTabView: View {
     @State private var showEncounterChat = false
     @AppStorage("totalMatchCount") private var totalMatchCount = 0
     @Environment(\.requestReview) private var requestReview
+    @State private var showVerificationSheet = false
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -225,6 +226,14 @@ struct MainTabView: View {
                     .zIndex(3)
             }
 
+            // 本人確認バナー（未承認時のみ）
+            if let vStatus = authVM.verificationStatus, !vStatus.isApproved {
+                VerificationBanner(status: vStatus) {
+                    showVerificationSheet = true
+                }
+                .zIndex(3)
+            }
+
             // マッチング通知バナー
             if showMatchBanner, let notification = socketService.newMatchNotification {
                 MatchBanner(notification: notification)
@@ -248,6 +257,8 @@ struct MainTabView: View {
                 PushNotificationService.shared.requestPermissionAndRegister()
                 // LocationServiceにSocketServiceを連携
                 locationService.socketService = socketService
+                // 本人確認ステータスを取得
+                Task { await authVM.refreshVerificationStatus() }
             }
         }
         .onChange(of: socketService.newMatchNotification) { _, _ in
@@ -266,6 +277,9 @@ struct MainTabView: View {
             encounterMatchId = match.matchId
             matchVM.fetchMatches()
             withAnimation { showEncounterChat = true }
+        }
+        .sheet(isPresented: $showVerificationSheet) {
+            VerificationView().environmentObject(authVM)
         }
         .sheet(isPresented: $showEncounterChat) {
             if let matchId = encounterMatchId,
@@ -596,6 +610,16 @@ struct DiscoveryView: View {
     @StateObject private var viewModel = DiscoveryViewModel()
     @StateObject private var locationService = LocationService()
     @State private var showFilterSheet = false
+    @State private var showVerificationRequiredAlert = false
+    @State private var showVerificationSheet = false
+
+    private func requireVerification(_ action: () -> Void) {
+        if authVM.isVerified {
+            action()
+        } else {
+            showVerificationRequiredAlert = true
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -660,9 +684,9 @@ struct DiscoveryView: View {
                             if let topUser = viewModel.nearbyUsers.first {
                                 UserCardView(
                                     user: topUser,
-                                    onLike: { viewModel.likeUser(topUser.id) },
+                                    onLike: { requireVerification { viewModel.likeUser(topUser.id) } },
                                     onDislike: { viewModel.dislikeUser(topUser.id) },
-                                    onSuperLike: { viewModel.superlikeUser(topUser.id) },
+                                    onSuperLike: { requireVerification { viewModel.superlikeUser(topUser.id) } },
                                     onBlock: { viewModel.blockUser(topUser.id) },
                                     onReport: { reason in viewModel.reportUser(topUser.id, reason: reason) }
                                 )
@@ -706,6 +730,15 @@ struct DiscoveryView: View {
             } message: {
                 Text("1日のいいね上限（20件）に達しました。明日またお試しください。")
             }
+            .alert("本人確認が必要です", isPresented: $showVerificationRequiredAlert) {
+                Button("本人確認へ進む") { showVerificationSheet = true }
+                Button("キャンセル", role: .cancel) {}
+            } message: {
+                Text("安心してご利用いただくため、本人確認の承認後にライク機能がご利用いただけます。")
+            }
+            .sheet(isPresented: $showVerificationSheet) {
+                VerificationView().environmentObject(authVM)
+            }
             .sheet(isPresented: $showFilterSheet) {
                 FilterSheetView(viewModel: viewModel)
             }
@@ -718,6 +751,7 @@ struct DiscoveryView: View {
                     } else {
                         locationService.startUpdating()
                     }
+                    Task { await authVM.refreshVerificationStatus() }
                 }
             }
             .onChange(of: locationService.currentLocation) { _, newLocation in
@@ -1185,6 +1219,7 @@ struct ProfileView: View {
     @State private var showCoinShop = false
     @State private var showDeleteAccountConfirm = false
     @State private var isDeletingAccount = false
+    @State private var showVerification = false
     #if DEBUG
     @State private var seedMessage = ""
     @State private var showSeedResult = false
@@ -1232,6 +1267,27 @@ struct ProfileView: View {
                     Text("プロフィール編集")
                         .frame(maxWidth: .infinity).padding()
                         .background(Color.blue).foregroundColor(.white).cornerRadius(8)
+                }
+                .padding(.horizontal)
+
+                // 本人確認エントリ
+                Button(action: { showVerification = true }) {
+                    HStack {
+                        Image(systemName: verificationIconName)
+                            .foregroundColor(verificationTint)
+                        Text("本人確認")
+                            .foregroundColor(.primary)
+                        Spacer()
+                        Text(verificationLabel)
+                            .font(.caption)
+                            .foregroundColor(verificationTint)
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
+                    .padding()
+                    .background(Color(.systemGray6))
+                    .cornerRadius(10)
                 }
                 .padding(.horizontal)
 
@@ -1346,10 +1402,38 @@ struct ProfileView: View {
             .sheet(isPresented: $showCoinShop) {
                 CoinShopView().environmentObject(authVM)
             }
+            .sheet(isPresented: $showVerification) {
+                VerificationView().environmentObject(authVM)
+            }
             .onAppear {
                 if authVM.currentUser == nil { authVM.loadProfile() }
+                Task { await authVM.refreshVerificationStatus() }
             }
         }
+    }
+
+    private var verificationIconName: String {
+        guard let s = authVM.verificationStatus else { return "person.crop.rectangle" }
+        if s.isApproved { return "checkmark.seal.fill" }
+        if s.isPending { return "clock.fill" }
+        if s.isRejected { return "xmark.seal.fill" }
+        return "person.crop.rectangle"
+    }
+
+    private var verificationTint: Color {
+        guard let s = authVM.verificationStatus else { return .gray }
+        if s.isApproved { return .green }
+        if s.isPending { return .orange }
+        if s.isRejected { return .red }
+        return .blue
+    }
+
+    private var verificationLabel: String {
+        guard let s = authVM.verificationStatus else { return "未確認" }
+        if s.isApproved { return "確認済み" }
+        if s.isPending { return "審査中" }
+        if s.isRejected { return "却下" }
+        return "未提出"
     }
 }
 
@@ -1847,6 +1931,52 @@ struct EmailVerificationBanner: View {
             .background(Color(.systemYellow).opacity(0.15))
             .overlay(Rectangle().frame(height: 1).foregroundColor(.orange.opacity(0.4)), alignment: .bottom)
         }
+    }
+}
+
+// MARK: - Verification Banner
+
+struct VerificationBanner: View {
+    let status: VerificationStatus
+    let onTap: () -> Void
+
+    private var iconName: String {
+        if status.isPending { return "clock.fill" }
+        if status.isRejected { return "exclamationmark.triangle.fill" }
+        return "person.crop.rectangle.badge.xmark"
+    }
+
+    private var tint: Color {
+        if status.isPending { return .orange }
+        if status.isRejected { return .red }
+        return .blue
+    }
+
+    private var message: String {
+        if status.isPending { return "本人確認を審査中です" }
+        if status.isRejected { return "本人確認が却下されました。再提出してください" }
+        return "本人確認を完了してください"
+    }
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 10) {
+                Image(systemName: iconName)
+                    .foregroundColor(tint)
+                Text(message)
+                    .font(.caption).fontWeight(.medium)
+                    .foregroundColor(.primary)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption2)
+                    .foregroundColor(.gray)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(tint.opacity(0.12))
+            .overlay(Rectangle().frame(height: 1).foregroundColor(tint.opacity(0.4)), alignment: .bottom)
+        }
+        .buttonStyle(.plain)
     }
 }
 

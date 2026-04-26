@@ -8,6 +8,9 @@ class AuthViewModel: ObservableObject {
     @Published var errorMessage: String? = nil
     @Published var token: String? = nil
     @Published var currentUser: UserProfile? = nil
+    @Published var verificationStatus: VerificationStatus? = nil
+
+    var isVerified: Bool { verificationStatus?.isApproved == true }
 
     private let apiClient = APIClient()
     private static let tokenKey = "authToken"
@@ -78,6 +81,7 @@ class AuthViewModel: ObservableObject {
         token = nil
         isLoggedIn = false
         currentUser = nil
+        verificationStatus = nil
         KeychainHelper.delete(key: Self.tokenKey)
         KeychainHelper.delete(key: Self.refreshKey)
         errorMessage = nil
@@ -89,6 +93,7 @@ class AuthViewModel: ObservableObject {
             do {
                 let response = try await apiClient.getProfile(token: token)
                 self.currentUser = response.user
+                await self.refreshVerificationStatus()
             } catch let apiError as APIError {
                 if case .invalidResponse(let code, _) = apiError, code == 401 {
                     await self.tryRefreshToken()
@@ -111,6 +116,17 @@ class AuthViewModel: ObservableObject {
             self.loadProfile()
         } catch {
             logout()
+        }
+    }
+
+    @MainActor
+    func refreshVerificationStatus() async {
+        guard let token = token else { return }
+        do {
+            let status = try await apiClient.getVerificationStatus(token: token)
+            self.verificationStatus = status
+        } catch {
+            // 失敗時は状態を変更しない（既存値を保持）
         }
     }
 

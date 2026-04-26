@@ -8,8 +8,8 @@
 ---
 
 ## 📊 進捗
-- TODO: 2pt / IN PROGRESS: 0pt / DONE: 18pt
-- 達成率: 90%
+- TODO: 2pt / IN PROGRESS: 0pt / DONE: 31pt
+- 達成率: Sprint 1完了（年齢確認機能を追加実装）
 
 ---
 
@@ -36,6 +36,9 @@ _なし_
 
 ## ✅ DONE
 
+- [x] **[Backend 5pt + iOS 5pt]** 年齢確認（Phase 1: 目視確認）実装
+  - Backend: verificationStatus フィールド追加、/api/verification エンドポイント、管理者承認/却下API、requireVerification ミドルウェア（like/superlike/message/socket gating）、16テスト全パス
+  - iOS: VerificationView（カメラ/フォトライブラリ対応）、APIClient拡張、AuthViewModel.verificationStatus、ContentView gating（like/superlike）、プロフィール画面に本人確認行追加、Info.plist カメラ権限
 - [x] Railway バックエンドデプロイ
 - [x] MongoDB Atlas 接続
 - [x] iOS 本番サーバー URL 設定
